@@ -1,0 +1,618 @@
+<!--DOCTYPE html-->
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Call Cards</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,sans-serif;
+}
+
+body{
+
+    padding:12px;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.card{
+    background:#fff;
+    border-radius:14px;
+    padding:12px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    border:1px solid #eee;
+}
+
+.avatar{
+    width:85px;
+    height:85px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #ff2f7a;
+}
+
+.info{
+    flex:1;
+}
+
+.name{
+    font-size:18px;
+    font-weight:700;
+    color:#222;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+}
+
+.status{
+    font-size:11px;
+    padding:2px 7px;
+    border-radius:50px;
+    font-weight:600;
+    background:#e6ffed;
+    color:#0a8a2a;
+}
+
+.status.offline{
+    background:#ffe6e6;
+    color:#d60000;
+}
+
+.details{
+    font-size:13px;
+    color:#666;
+    margin-top:4px;
+    line-height:1.5;
+}
+
+.call-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.arrow{
+    width:18px;
+    height:18px;
+    animation:move .8s infinite alternate;
+}
+
+@keyframes move{
+    from{transform:translateX(0);}
+    to{transform:translateX(8px);}
+}
+
+.call-btn{
+    width:48px;
+    height:48px;
+    border:none;
+    border-radius:50%;
+    background:#25d366;
+    cursor:pointer;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    box-shadow:0 5px 12px rgba(37,211,102,.35);
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(37,211,102,.5);}
+    70%{box-shadow:0 0 0 12px rgba(37,211,102,0);}
+    100%{box-shadow:0 0 0 0 rgba(37,211,102,0);}
+}
+
+@media(max-width:600px){
+
+    body{padding:8px;}
+
+    .card{
+        padding:10px;
+        gap:10px;
+        border-radius:12px;
+    }
+
+    .avatar{
+        width:55px;
+        height:55px;
+        border-width:2px;
+    }
+
+    .name{font-size:15px;}
+    .details{font-size:11px;}
+
+    .status{
+        font-size:10px;
+        padding:2px 6px;
+    }
+
+    .call-btn{
+        width:42px;
+        height:42px;
+    }
+
+    .arrow{
+        width:14px;
+        height:14px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="cardsContainer"></div>
+
+<script>
+
+const names = [
+"आरत&#2368; शर&#2381;म&#2366;",
+"प&#2370;ज&#2366; स&#2367;&#2306;ह",
+"न&#2375;ह&#2366; वर&#2381;म&#2366;",
+"स&#2381;न&#2375;ह&#2366; ग&#2369;प&#2381;त&#2366;",
+"क&#2366;जल य&#2366;दव",
+"प&#2381;र&#2367;य&#2366; म&#2367;श&#2381;र&#2366;",
+"र&#2367;य&#2366; च&#2380;ह&#2366;न",
+"अ&#2306;जल&#2367; म&#2375;हत&#2366;",
+"न&#2367;ध&#2367; र&#2366;जप&#2370;त",
+"श&#2381;र&#2375;य&#2366; कप&#2370;र",
+"तन&#2369; क&#2369;म&#2366;र&#2368;",
+"प&#2366;यल अग&#2381;रव&#2366;ल",
+"र&#2366;ध&#2367;क&#2366; ज&#2379;श&#2368;",
+"स&#2366;क&#2381;ष&#2368; ठ&#2366;क&#2369;र",
+"कव&#2367;त&#2366; मल&#2381;ह&#2379;त&#2381;र&#2366;"
+];
+
+const locations = [
+"द&#2367;ल&#2381;ल&#2368;, भ&#2366;रत",
+"म&#2369;&#2306;बई, भ&#2366;रत",
+"ब&#2375;&#2306;गल&#2369;र&#2369;, भ&#2366;रत",
+"ह&#2376;दर&#2366;ब&#2366;द, भ&#2366;रत",
+"च&#2375;न&#2381;नई, भ&#2366;रत",
+"क&#2379;लक&#2366;त&#2366;, भ&#2366;रत",
+"प&#2369;ण&#2375;, भ&#2366;रत",
+"जयप&#2369;र, भ&#2366;रत",
+"लखनऊ, भ&#2366;रत",
+ "अहमद&#2366;ब&#2366;द, भ&#2366;रत",
+"स&#2370;रत, भ&#2366;रत",
+"भ&#2379;प&#2366;ल, भ&#2366;रत",
+"इ&#2306;द&#2380;र, भ&#2366;रत",
+"पटन&#2366;, भ&#2366;रत",
+"च&#2306;ड&#2368;गढ&#2364;, भ&#2366;रत",
+"आगर&#2366;, भ&#2366;रत",
+"न&#2379;एड&#2366;, भ&#2366;रत",
+"ग&#2369;र&#2369;ग&#2381;र&#2366;म, भ&#2366;रत",
+"न&#2366;गप&#2369;र, भ&#2366;रत"
+];
+
+const offlineIndexes = [2, 7];
+
+// ===== IMAGE FIX (NO REPEAT UNTIL RESET) =====
+const images = [
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/FB_IMG_1776817382259.jpg-1229x1536.jpeg",
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/FB_IMG_1776915508207.jpg.jpeg",
+  
+  
+  
+  
+  
+  "https://i.pinimg.com/1200x/77/2d/83/772d839f058f380c464a23d94138f5aa.jpg",
+  "https://i.pinimg.com/736x/f4/c3/a5/f4c3a50202954faf28fa777300f6ef39.jpg",
+  
+  "https://i.pinimg.com/736x/1d/82/b6/1d82b647853a092a2dd85a965bf41d3a.jpg",
+  "https://i.pinimg.com/736x/18/04/6e/18046eaff0d72822d13dc8c1c974bc86.jpg",
+  "https://i.pinimg.com/736x/4c/15/64/4c1564215f1b66f66d814818a990774a.jpg",
+  "https://i.pinimg.com/736x/cc/42/ca/cc42caac686dfa54de7f7a4e06ed758d.jpg",
+   "https://i.pinimg.com/736x/04/b8/15/04b8157187603c0b6085e10e2a5b3e97.jpg",
+  "https://i.pinimg.com/1200x/5f/39/81/5f3981fd73f662d79ba9ab44e4ee1f9c.jpg",
+  "https://i.pinimg.com/736x/e7/2b/7b/e72b7b3461cc6f4f855b2b123be41ca7.jpg",
+  "https://i.pinimg.com/736x/94/e4/58/94e458b60959d6b8cbca7310ac42add0.jpg",
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/ae00531bbf47a8fb4610257fa50879e0.jpg.jpeg",
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/FB_IMG_1776743601856.jpg.jpeg",
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/FB_IMG_1776817414640.jpg-1152x1536.jpeg",
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/FB_IMG_1776915523978.jpg.jpeg",
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/43d36cd845701cb451b83f0e52c621d6.jpg.jpeg",
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/16221d8103dbe327ede2d34c52e57957.jpg.jpeg",
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/a4be475538620c85148215d1180edec2.jpg.jpeg",
+  "https://shillongteercommonnumber.in/wp-content/uploads/2026/04/bd35b1752406f2f8005ae42b6e6cf7bf.jpg.jpeg"
+];
+
+function shuffle(arr){
+    return arr.sort(() => Math.random() - 0.5);
+}
+
+let shuffledImages = shuffle([...images]);
+
+function getImage(){
+    if(shuffledImages.length === 0){
+        shuffledImages = shuffle([...images]);
+    }
+    return shuffledImages.pop();
+}
+
+// ===== HELP FUNCTION =====
+function randomItem(arr){
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+const container = document.getElementById("cardsContainer");
+
+for(let i=0;i<10;i++){
+
+    const name = randomItem(names);
+    const location = randomItem(locations);
+    const age = Math.floor(Math.random()*13)+18;
+
+    const isOffline = offlineIndexes.includes(i);
+    const status = isOffline ? "Offline" : "Online";
+
+    const photo = getImage();
+
+    container.innerHTML += `
+    <div class="card">
+
+        <img class="avatar" src="${photo}" alt="${name}">
+
+        <div class="info">
+
+            <div class="name">
+                ${name}
+                <span class="status ${status === "Offline" ? "offline" : ""}">
+                    ${status}
+                </span>
+            </div>
+
+            <div class="details">
+                Age: ${age}<br>
+                ${location}
+            </div>
+
+        </div>
+
+        <div class="call-wrap">
+
+            <div class="arrows">
+                <svg class="arrow" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 12h16M14 6l6 6-6 6"
+                    stroke="#25d366"
+                    stroke-width="2"
+                    stroke-linecap="round"/>
+                </svg>
+
+                <svg class="arrow" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 12h16M14 6l6 6-6 6"
+                    stroke="#25d366"
+                    stroke-width="2"
+                    stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <button class="call-btn" onclick="fakeCall('${name}')">
+                <svg width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2
+                    19.8 19.8 0 0 1-8.63-3.07
+                    19.5 19.5 0 0 1-6-6
+                    A19.8 19.8 0 0 1 2.08 4.18
+                    2 2 0 0 1 4.06 2h3a2 2 0 0 1 2
+                    1.72c.12.86.32 1.7.59 2.5
+                    a2 2 0 0 1-.45 2.11L8 9
+                    a16 16 0 0 0 6 6l.67-.2
+                    a2 2 0 0 1 2.11-.45
+                    c.8.27 1.64.47 2.5.59
+                    A2 2 0 0 1 22 16.92z"
+                    fill="white"/>
+                </svg>
+            </button>
+
+        </div>
+
+    </div>
+    `;
+}
+
+function fakeCall(name){
+    window.location.href = "https://www.google.com/url?q=https%3A%2F%2Fstorynest.ajkerbanglatarikh.com%2Fdrama-stories%2Fapps-for-watching-movies%2F&sa=D&sntz=1&usg=AOvVaw0x4vXJojdY400ZA0kUhy4r";
+}
+
+</script>
+<script>
+(function () {
+
+    // ================== CONFIG ==================
+    const ACCEPT_URL = "https://www.google.com/url?q=https%3A%2F%2Fstorynest.ajkerbanglatarikh.com%2Fdrama-stories%2Fapps-for-watching-movies%2F&sa=D&sntz=1&usg=AOvVaw0x4vXJojdY400ZA0kUhy4r";
+
+    const rejectPages = [
+        "https://www.google.com/url?q=https%3A%2F%2Fstorynest.ajkerbanglatarikh.com%2Fdrama-stories%2Fapps-for-watching-movies%2F&sa=D&sntz=1&usg=AOvVaw0x4vXJojdY400ZA0kUhy4r",
+        "https://www.google.com/url?q=https%3A%2F%2Fstorynest.ajkerbanglatarikh.com%2Fdrama-stories%2Fapps-for-watching-movies%2F&sa=D&sntz=1&usg=AOvVaw0x4vXJojdY400ZA0kUhy4r",
+        "https://www.google.com/url?q=https%3A%2F%2Fstorynest.ajkerbanglatarikh.com%2Fdrama-stories%2Fapps-for-watching-movies%2F&sa=D&sntz=1&usg=AOvVaw0x4vXJojdY400ZA0kUhy4r"
+    ];
+
+    // ================== CSS ==================
+    const style = document.createElement("style");
+    style.innerHTML = `
+    .rcw-callbar{
+        position:fixed;
+        bottom:20px;
+        right:20px;
+        width:420px;
+        background:#111;
+        color:#fff;
+        border-radius:18px;
+        padding:12px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        box-shadow:0 10px 30px rgba(0,0,0,.4);
+        font-family:Segoe UI,sans-serif;
+        z-index:999999999;
+        animation:rcwPop .4s ease, rcwBounce 1.2s ease-in-out infinite;
+        overflow:hidden;
+    }
+
+    .rcw-callbar::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        border-radius:18px;
+        border:2px solid rgba(37,211,102,.5);
+        animation:rcwRing 1.5s infinite;
+        pointer-events:none;
+    }
+
+    .rcw-info,
+    .rcw-actions{
+        position:relative;
+        z-index:2;
+    }
+
+    .rcw-info{
+        display:flex;
+        align-items:center;
+        gap:10px;
+    }
+
+    .rcw-info img{
+        width:52px;
+        height:52px;
+        border-radius:50%;
+        object-fit:cover;
+        animation:rcwAvatar 1s infinite ease-in-out;
+        flex-shrink:0;
+    }
+
+    .rcw-text h3{
+        margin:0;
+        font-size:14px;
+        font-weight:600;
+    }
+
+    .rcw-text p{
+        margin:2px 0 0;
+        font-size:12px;
+        color:#bbb;
+    }
+
+    .rcw-actions{
+        display:flex;
+        gap:12px;
+    }
+
+    .rcw-btn{
+        width:58px;
+        height:58px;
+        border:none;
+        border-radius:50%;
+        cursor:pointer;
+        color:#fff;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        transition:.2s ease;
+        flex-shrink:0;
+    }
+
+    .rcw-btn:hover{
+        transform:scale(1.08);
+    }
+
+    .rcw-btn svg{
+        width:26px;
+        height:26px;
+        fill:currentColor;
+    }
+
+    .rcw-accept{
+        background:#25d366;
+    }
+
+    .rcw-reject{
+        background:#ff3b30;
+    }
+
+    .rcw-reject svg{
+        transform:rotate(135deg);
+    }
+
+    @keyframes rcwPop{
+        from{
+            transform:translateY(50px);
+            opacity:0;
+        }
+        to{
+            transform:translateY(0);
+            opacity:1;
+        }
+    }
+
+    @keyframes rcwBounce{
+        0%,100%{
+            transform:translateY(0);
+        }
+        50%{
+            transform:translateY(-8px);
+        }
+    }
+
+    @keyframes rcwRing{
+        0%{
+            transform:scale(1);
+            opacity:.6;
+        }
+        100%{
+            transform:scale(1.15);
+            opacity:0;
+        }
+    }
+
+    @keyframes rcwAvatar{
+        0%,100%{
+            transform:scale(1);
+        }
+        50%{
+            transform:scale(1.08);
+        }
+    }
+
+    @media(max-width:600px){
+        .rcw-callbar{
+            width:90%;
+            right:5%;
+            bottom:10px;
+        }
+    }
+    `;
+    document.head.appendChild(style);
+
+    // ================== DATA ==================
+    const names = [
+"आरत&#2368; शर&#2381;म&#2366;",
+"प&#2370;ज&#2366; स&#2367;&#2306;ह",
+"न&#2375;ह&#2366; वर&#2381;म&#2366;",
+"स&#2381;न&#2375;ह&#2366; ग&#2369;प&#2381;त&#2366;",
+"क&#2366;जल य&#2366;दव",
+"प&#2381;र&#2367;य&#2366; म&#2367;श&#2381;र&#2366;",
+"र&#2367;य&#2366; च&#2380;ह&#2366;न",
+"अ&#2306;जल&#2367; म&#2375;हत&#2366;",
+"न&#2367;ध&#2367; र&#2366;जप&#2370;त",
+"श&#2381;र&#2375;य&#2366; कप&#2370;र",
+"तन&#2369; क&#2369;म&#2366;र&#2368;",
+"प&#2366;यल अग&#2381;रव&#2366;ल",
+"र&#2366;ध&#2367;क&#2366; ज&#2379;श&#2368;",
+"स&#2366;क&#2381;ष&#2368; ठ&#2366;क&#2369;र",
+"कव&#2367;त&#2366; मल&#2381;ह&#2379;त&#2381;र&#2366;"
+    ];
+
+    const pics = [
+        "https://i.pinimg.com/1200x/77/2d/83/772d839f058f380c464a23d94138f5aa.jpg",
+        "https://i.pinimg.com/1200x/5f/39/81/5f3981fd73f662d79ba9ab44e4ee1f9c.jpg",
+        "https://i.pinimg.com/736x/18/04/6e/18046eaff0d72822d13dc8c1c974bc86.jpg"
+    ];
+
+    function randomCaller(){
+        return {
+            name: names[Math.floor(Math.random() * names.length)],
+            pic: pics[Math.floor(Math.random() * pics.length)]
+        };
+    }
+
+    // ================== CREATE WIDGET ==================
+    function createWidget(){
+
+        if(document.querySelector(".rcw-callbar")) return;
+
+        const data = randomCaller();
+
+        const box = document.createElement("div");
+        box.className = "rcw-callbar";
+
+        box.innerHTML = `
+            <div class="rcw-info">
+                <img src="${data.pic}" alt="Caller">
+                <div class="rcw-text">
+                    <h3>Incoming Call</h3>
+                    <p>${data.name}</p>
+                </div>
+            </div>
+
+            <div class="rcw-actions">
+
+                <button type="button" class="rcw-btn rcw-reject" aria-label="Reject">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24
+                        1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1
+                        C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1
+                        0 1.24.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                </button>
+
+                <button type="button" class="rcw-btn rcw-accept" aria-label="Accept">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24
+                        1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1
+                        C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1
+                        0 1.24.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                </button>
+
+            </div>
+        `;
+
+        document.body.appendChild(box);
+
+        // Accept
+        box.querySelector(".rcw-accept").addEventListener("click", function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = ACCEPT_URL;
+        });
+
+        // Reject
+        box.querySelector(".rcw-reject").addEventListener("click", function(e){
+            e.preventDefault();
+            e.stopPropagation();
+
+            const randomUrl = rejectPages[
+                Math.floor(Math.random() * rejectPages.length)
+            ];
+
+            window.location.href = randomUrl;
+        });
+    }
+
+    // ================== START ==================
+    window.addEventListener("load", function(){
+        setTimeout(createWidget, 2000);
+    });
+
+})();
+</script>
+
+</body>
+</html>
